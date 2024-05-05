@@ -72,6 +72,9 @@ local function change_working_directory(prompt_bufnr, prompt)
     actions.close(prompt_bufnr)
   end
   local cd_successful = project.set_pwd(project_path, "telescope")
+  if cd_successful then
+    print("Changed project to " .. selected_entry.name)
+  end
   return project_path, cd_successful
 end
 
@@ -144,42 +147,44 @@ end
 local function projects(opts)
   opts = opts or {}
 
-  pickers.new(opts, {
-    prompt_title = "Recent Projects",
-    finder = create_finder(),
-    previewer = false,
-    sorter = telescope_config.generic_sorter(opts),
-    attach_mappings = function(prompt_bufnr, map)
-      map("n", "f", find_project_files)
-      map("n", "b", browse_project_files)
-      map("n", "d", delete_project)
-      map("n", "s", search_in_project_files)
-      map("n", "r", recent_project_files)
-      map("n", "w", change_working_directory)
+  pickers
+    .new(opts, {
+      prompt_title = "Recent Projects",
+      finder = create_finder(),
+      previewer = false,
+      sorter = telescope_config.generic_sorter(opts),
+      attach_mappings = function(prompt_bufnr, map)
+        map("n", "f", find_project_files)
+        map("n", "b", browse_project_files)
+        map("n", "d", delete_project)
+        map("n", "s", search_in_project_files)
+        map("n", "r", recent_project_files)
+        map("n", "w", change_working_directory)
 
-      map("i", "<c-f>", find_project_files)
-      map("i", "<c-b>", browse_project_files)
-      map("i", "<c-d>", delete_project)
-      map("i", "<c-s>", search_in_project_files)
-      map("i", "<c-r>", recent_project_files)
-      map("i", "<c-w>", change_working_directory)
+        map("i", "<c-f>", find_project_files)
+        map("i", "<c-b>", browse_project_files)
+        map("i", "<c-d>", delete_project)
+        map("i", "<c-s>", search_in_project_files)
+        map("i", "<c-r>", recent_project_files)
+        map("i", "<c-w>", change_working_directory)
 
-      local default_action = function()
-        local action_table = {
-          find = find_project_files,
-          browse = browse_project_files,
-          search = search_in_project_files,
-          recent = recent_project_files,
-          cd = change_working_directory,
-        }
-        local action = action_table[config.options.telescope_default_action]
-        action(prompt_bufnr)
-      end
+        local default_action = function()
+          local action_table = {
+            find = find_project_files,
+            browse = browse_project_files,
+            search = search_in_project_files,
+            recent = recent_project_files,
+            cd = change_working_directory,
+          }
+          local action = action_table[config.options.telescope_default_action]
+          action(prompt_bufnr)
+        end
 
-      actions.select_default:replace(default_action)
-      return true
-    end,
-  }):find()
+        actions.select_default:replace(default_action)
+        return true
+      end,
+    })
+    :find()
 end
 
 return telescope.register_extension({
